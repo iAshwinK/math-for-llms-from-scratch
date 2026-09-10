@@ -27,7 +27,7 @@ yours passes, then compare.
 
 from __future__ import annotations
 
-import numpy as np  # noqa: F401  # you will need this
+import numpy as np  # you will need this
 
 from ._util import Matrix, require_conformable
 
@@ -57,7 +57,7 @@ def matmul_rows(A: Matrix, B: Matrix) -> Matrix:
     C: Matrix = np.zeros((A.shape[0], B.shape[1]))
     for i in range(A.shape[0]):
         for k in range(A.shape[1]):
-            C[i, :] += A[i, k] * B[k,:]
+            C[i, :] += A[i, k] * B[k, :]
     return C
 
 
@@ -74,10 +74,10 @@ def matmul_columns(A: Matrix, B: Matrix) -> Matrix:
     """
     require_conformable(A, B)
 
-    C: Matrix = np.zeros((A.shape[0],B.shape[1]))
+    C: Matrix = np.zeros((A.shape[0], B.shape[1]))
 
     for j in range(B.shape[1]):
-        C[:,j] = (A * B[:,j]).sum(axis=1)
+        C[:, j] = (A * B[:, j]).sum(axis=1)
 
     return C
 
@@ -95,7 +95,12 @@ def matmul_outer(A: Matrix, B: Matrix) -> Matrix:
     Hint: an outer product is `(m, 1) * (1, n)`. Start C at zeros.
     """
     require_conformable(A, B)
-    raise NotImplementedError
+    C: Matrix = np.zeros((A.shape[0], B.shape[1]))
+
+    for j in range(A.shape[1]):
+        C += A[:, j].reshape(-1, 1) * B[j, :]
+
+    return C
 
 
 def matmul_broadcast(A: Matrix, B: Matrix) -> Matrix:
@@ -108,4 +113,8 @@ def matmul_broadcast(A: Matrix, B: Matrix) -> Matrix:
     before you run the benchmark. That number is the point of this function.
     """
     require_conformable(A, B)
-    raise NotImplementedError
+
+    A_3d = A[:, :, np.newaxis]
+    B_3d = B[np.newaxis, :, :]
+
+    return (A_3d * B_3d).sum(axis=1)
